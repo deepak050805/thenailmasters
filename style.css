@@ -334,6 +334,7 @@ header.scrolled{
   display:flex;flex-direction:column;align-items:center;gap:10px;
   font-size:0.65rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--brown);
 }
+/* # */
 .scroll-cue i{
   width:1px;height:44px;background:linear-gradient(var(--brown),transparent);
   position:relative;overflow:hidden;
