@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ---------------- Preloader --------------- */
+  /* ---------------- Preloader ---------------- */
   const preMark = document.getElementById('preMark');
   const brandLetters = 'The Nail Masters'.split('');
   brandLetters.forEach((ch, i) => {
