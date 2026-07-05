@@ -1,21 +1,3 @@
-/* ============================================================
-   THE NAIL MASTERS — Design System
-   Palette:
-     --ivory:      #FBF7F1  (base background)
-     --champagne:  #C6A15B  (primary accent / gold)
-     --charcoal:   #241F1C  (deep text / dark sections)
-     --rosegold:   #D9B7AC  (secondary accent)
-     --blush:      #F0DFDA  (soft accent / tints)
-     --brown:      #5C4433  (secondary text, warm brown)
-   Type:
-     Display  — 'Cormorant Garamond' (luxury serif, headings)
-     Body     — 'Jost' (modern geometric sans)
-     Utility  — 'Jost' tracked uppercase (labels, nav, eyebrows)
-   Signature element:
-     Hand-drawn gold "brush stroke" SVG divider — echoes a nail
-     polish brush swipe, used under headings & between sections.
-   ============================================================ */
-
 :root{
   --ivory:#FBF7F1;
   --ivory-2:#F5EEE3;
@@ -81,6 +63,7 @@ h1,h2,h3,h4{
 }
 
 .section{padding:140px 0;position:relative;}
+@media (max-width:900px){.section{padding:100px 0;}}
 .section--tight{padding:100px 0;}
 .section--dark{background:var(--charcoal);color:var(--ivory-2);}
 .section--dark h1,.section--dark h2,.section--dark h3{color:var(--ivory);}
@@ -270,7 +253,7 @@ header.scrolled{
   border:1px solid var(--line);transition:.3s var(--ease);
 }
 .icon-btn:hover{border-color:var(--champagne);background:var(--blush);}
-.burger{display:none;width:26px;height:18px;position:relative;flex-direction:column;justify-content:space-between;}
+.burger{display:none;width:26px;height:18px;padding:14px;position:relative;flex-direction:column;justify-content:space-between;box-sizing:content-box;}
 .burger span{height:1px;background:var(--charcoal);width:100%;}
 
 @media (max-width:1080px){
@@ -366,6 +349,10 @@ header.scrolled{
   .hero-grid{grid-template-columns:1fr;}
   .hero-visual{order:-1;max-width:340px;margin:0 auto;}
   .hero-badge{left:0;}
+  .hero-stats{flex-wrap:wrap;gap:28px;}
+}
+@media (max-width:380px){
+  .hero-float{right:8px;}
 }
 
 /* ---------- Marquee ---------- */
@@ -436,6 +423,9 @@ header.scrolled{
 .service-meta .price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--champagne-dark);}
 .service-meta .dur{font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--brown);}
 .service-book{margin-top:22px;}
+@media (max-width:420px){
+  .service-row{grid-template-columns:1fr;}
+}
 
 /* ---------- Gallery ---------- */
 .gallery-filters{
@@ -489,6 +479,7 @@ header.scrolled{
 
 @media (max-width:1100px){.masonry{columns:3 220px;}}
 @media (max-width:700px){.masonry{columns:2 160px;}}
+@media (max-width:400px){.masonry{columns:2 130px;column-gap:12px;}}
 
 /* ---------- Testimonials ---------- */
 .testi-card{
@@ -513,6 +504,9 @@ header.scrolled{
 .testi-who b{display:block;font-size:0.9rem;color:var(--charcoal);}
 .testi-who span{font-size:0.72rem;color:var(--brown);}
 .swiper{overflow:visible;padding-bottom:20px;}
+@media (max-width:560px){
+  .testi-card{padding:28px;min-height:0;}
+}
 /* ---------- Pricing ---------- */
 .pricing-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;
@@ -534,6 +528,9 @@ header.scrolled{
 .price-card ul{margin:26px 0;display:flex;flex-direction:column;gap:14px;}
 .price-card ul li{display:flex;gap:10px;font-size:0.88rem;align-items:flex-start;}
 .price-card ul li svg{flex-shrink:0;margin-top:2px;color:var(--champagne-dark);}
+@media (max-width:420px){
+  .pricing-grid{grid-template-columns:1fr;}
+}
 
 /* ---------- Offers ---------- */
 .offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
