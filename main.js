@@ -1,10 +1,3 @@
-/* ==============================================================
-   THE NAIL MASTERS — main.js
-   Preloader, custom cursor, Lenis smooth scroll, GSAP reveals,
-   AOS init, gallery (masonry/filter/lightbox), testimonials
-   swiper, FAQ accordion, booking form, nav + micro-interactions.
-   ============================================================== */
-
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- Preloader ---------------- */
