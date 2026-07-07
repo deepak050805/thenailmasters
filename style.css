@@ -268,6 +268,23 @@ header.scrolled{
   .burger{display:flex;}
   .nav-links a{font-size:1rem;}
 }
+@media (max-width:560px){
+  header{padding:18px 0;}
+  header.scrolled{padding:12px 0;}
+  .logo{font-size:1.25rem;}
+  .logo small{font-size:0.48rem;letter-spacing:0.22em;}
+  .nav-cta{gap:10px;}
+  .nav-cta .icon-btn,
+  .nav-cta .btn{display:none;}
+  .nav-links{
+    width:min(340px,90vw);
+    justify-content:flex-start;
+    gap:20px;
+    padding:92px 28px 32px;
+    overflow-y:auto;
+  }
+  .nav-links a{font-size:0.9rem;letter-spacing:0.1em;}
+}
 
 /* ---------- Hero ---------- */
 .hero{
@@ -422,6 +439,12 @@ header.scrolled{
 .service-meta .price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--champagne-dark);}
 .service-meta .dur{font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--brown);}
 .service-book{margin-top:22px;}
+@media (max-width:560px){
+  .service-row{grid-template-columns:minmax(0,1fr);}
+  .service-card{padding:30px 24px;}
+  .service-card p.desc{min-height:0;}
+  .service-meta{align-items:flex-start;gap:12px;}
+}
 
 /* ---------- Gallery ---------- */
 .gallery-filters{
