@@ -7,9 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function isMobile() { return window.matchMedia('(max-width: 1080px)').matches; }
 
+  link.addEventListener('click', (e) => {
+    if (isMobile()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      dd.classList.toggle('open');
+    }
+  });
+
   trigger.addEventListener('click', (e) => {
     if (isMobile()) {
       e.preventDefault();
+      if (e.target === link) return;
       dd.classList.toggle('open');
     }
   });
