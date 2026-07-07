@@ -1,18 +1,20 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- Preloader ---------------- */
   const preMark = document.getElementById('preMark');
   const brandLetters = 'The Nail Masters'.split('');
-  brandLetters.forEach((ch, i) => {
-    const span = document.createElement('span');
-    span.textContent = ch === ' ' ? '\u00A0' : ch;
-    span.style.animationDelay = `${i * 0.035}s`;
-    preMark.appendChild(span);
-  });
+  if (preMark) {
+    brandLetters.forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      span.style.animationDelay = `${i * 0.035}s`;
+      preMark.appendChild(span);
+    });
+  }
 
   window.addEventListener('load', () => {
     setTimeout(() => {
-      document.getElementById('preloader').classList.add('hide');
+      document.getElementById('preloader')?.classList.add('hide');
       document.body.style.overflow = '';
     }, 1400);
   });
@@ -21,16 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const dot = document.querySelector('.cursor-dot');
   const ring = document.querySelector('.cursor-ring');
   let mx = 0, my = 0, rx = 0, ry = 0;
-  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
-  (function loopCursor(){
-    rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-    requestAnimationFrame(loopCursor);
-  })();
-  document.querySelectorAll('a, button, .filter-btn, .masonry-item, input, textarea, select').forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('grow'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('grow'));
-  });
+  if (dot && ring) {
+    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
+    (function loopCursor(){
+      rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(loopCursor);
+    })();
+    document.querySelectorAll('a, button, .filter-btn, .masonry-item, input, textarea, select').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('grow'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('grow'));
+    });
+  }
 
   /* ---------------- Lenis smooth scroll ---------------- */
   let lenis;
@@ -51,35 +55,30 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- Header scroll state ---------------- */
   const header = document.getElementById('siteHeader');
   window.addEventListener('scroll', () => {
-    header.classList.toggle('scrolled', window.scrollY > 40);
+    header?.classList.toggle('scrolled', window.scrollY > 40);
   });
 
   /* ---------------- Mobile nav ---------------- */
   const burger = document.getElementById('burger');
   const navLinks = document.getElementById('navLinks');
-  burger.addEventListener('click', () => {
-    navLinks.classList.toggle('open');
-    burger.classList.toggle('active');
-  });
-  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+  if (burger && navLinks) {
+    burger.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      burger.classList.toggle('active');
+    });
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+  }
 
   /* ---------------- Brush-stroke draw on view (signature element) ---------------- */
   const brushes = document.querySelectorAll('.brush');
-  const brushObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
-  }, { threshold: 0.4 });
-  brushes.forEach(b => brushObserver.observe(b));
-
-  /* ---------------- Magnetic buttons ---------------- */
-  document.querySelectorAll('[data-magnetic]').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width / 2;
-      const y = e.clientY - r.top - r.height / 2;
-      btn.style.transform = `translate(${x * 0.25}px, ${y * 0.4}px)`;
-    });
-    btn.addEventListener('mouseleave', () => { btn.style.transform = 'translate(0,0)'; });
-  });
+  if ('IntersectionObserver' in window) {
+    const brushObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
+    }, { threshold: 0.4 });
+    brushes.forEach(b => brushObserver.observe(b));
+  } else {
+    brushes.forEach(b => b.classList.add('in-view'));
+  }
 
   /* ---------------- Button ripple ---------------- */
   document.querySelectorAll('.btn').forEach(btn => {
@@ -123,14 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const masonry = document.getElementById('masonry');
-  galleryData.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'masonry-item';
-    div.dataset.cat = item.cat;
-    div.dataset.index = i;
-    div.innerHTML = `<img src="${item.img}" alt="${item.tag} — The Nail Masters, Mohali" loading="lazy"><span class="tag">${item.tag}</span>`;
-    masonry.appendChild(div);
-  });
+  if (masonry) {
+    galleryData.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'masonry-item';
+      div.dataset.cat = item.cat;
+      div.dataset.index = i;
+      div.innerHTML = `<img src="${item.img}" alt="${item.tag} — The Nail Masters, Mohali" loading="lazy"><span class="tag">${item.tag}</span>`;
+      masonry.appendChild(div);
+    });
+  }
 
   /* Filtering */
   const filterBtns = document.querySelectorAll('.filter-btn');
@@ -147,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Lightbox */
   const lightbox = document.getElementById('lightbox');
-  const lbImg = lightbox.querySelector('img');
   let currentIndex = 0;
   function visibleItems(){ return Array.from(document.querySelectorAll('.masonry-item:not(.hidden)')); }
   function openLightbox(index){
@@ -159,26 +159,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function updateLightbox(items){
     const item = items[currentIndex];
+    const lbImg = lightbox.querySelector('img');
     lbImg.src = item.querySelector('img').src.replace('w=500','w=1400');
     lbImg.alt = item.querySelector('img').alt;
   }
-  document.querySelectorAll('.masonry-item').forEach(item => {
-    item.addEventListener('click', () => openLightbox(Number(item.dataset.index)));
-  });
-  lightbox.querySelector('.lb-close').addEventListener('click', () => lightbox.classList.remove('open'));
-  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('open'); });
-  lightbox.querySelector('.lb-prev').addEventListener('click', () => {
-    const items = visibleItems(); currentIndex = (currentIndex - 1 + items.length) % items.length; updateLightbox(items);
-  });
-  lightbox.querySelector('.lb-next').addEventListener('click', () => {
-    const items = visibleItems(); currentIndex = (currentIndex + 1) % items.length; updateLightbox(items);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'Escape') lightbox.classList.remove('open');
-    if (e.key === 'ArrowRight') lightbox.querySelector('.lb-next').click();
-    if (e.key === 'ArrowLeft') lightbox.querySelector('.lb-prev').click();
-  });
+  if (lightbox) {
+    document.querySelectorAll('.masonry-item').forEach(item => {
+      item.addEventListener('click', () => openLightbox(Number(item.dataset.index)));
+    });
+    lightbox.querySelector('.lb-close')?.addEventListener('click', () => lightbox.classList.remove('open'));
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('open'); });
+    lightbox.querySelector('.lb-prev')?.addEventListener('click', () => {
+      const items = visibleItems(); currentIndex = (currentIndex - 1 + items.length) % items.length; updateLightbox(items);
+    });
+    lightbox.querySelector('.lb-next')?.addEventListener('click', () => {
+      const items = visibleItems(); currentIndex = (currentIndex + 1) % items.length; updateLightbox(items);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+      if (e.key === 'ArrowRight') lightbox.querySelector('.lb-next')?.click();
+      if (e.key === 'ArrowLeft') lightbox.querySelector('.lb-prev')?.click();
+    });
+  }
 
   /* ---------------- Swiper testimonials ---------------- */
   if (window.Swiper) {
@@ -186,7 +189,17 @@ document.addEventListener('DOMContentLoaded', () => {
       slidesPerView: 1,
       spaceBetween: 24,
       loop: true,
-      autoplay: { delay: 4500, disableOnInteraction: false },
+      speed: 6000,
+      allowTouchMove: true,
+      freeMode: {
+        enabled: true,
+        momentum: false
+      },
+      autoplay: {
+        delay: 1,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: false
+      },
       breakpoints: {
         720: { slidesPerView: 2 },
         1080: { slidesPerView: 3 }
@@ -209,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- Booking form ---------------- */
   const form = document.getElementById('bookingForm');
   const status = document.getElementById('formStatus');
-  form.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(form);
     const name = data.get('name'), phone = data.get('phone'), service = data.get('service'),
@@ -220,11 +233,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const msg = `Hi! I'd like to book an appointment.%0A` +
       `Name: ${name}%0APhone: ${phone}%0AService: ${service}%0ADate: ${date}%0ATime: ${time}` +
       (notes ? `%0ANotes: ${notes}` : '');
-    status.textContent = 'Opening WhatsApp to confirm your request…';
+    if (status) status.textContent = 'Opening WhatsApp to confirm your request...';
     setTimeout(() => {
       window.open(`https://wa.me/917696884103?text=${msg}`, '_blank');
       form.reset();
-      status.textContent = 'Request sent! We\'ll confirm your slot shortly.';
+      if (status) status.textContent = 'Request sent! We\'ll confirm your slot shortly.';
+    }, 500);
+  });
+
+  /* ---------------- Contact form ---------------- */
+  const contactForm = document.getElementById('contactForm');
+  const contactStatus = document.getElementById('contactFormStatus');
+  contactForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(contactForm);
+    const name = data.get('name'), phone = data.get('phone'), email = data.get('email'), message = data.get('message');
+
+    const msg = `Hi! I have a question.%0A` +
+      `Name: ${name}%0APhone: ${phone}` +
+      (email ? `%0AEmail: ${email}` : '') +
+      `%0AMessage: ${message}`;
+    if (contactStatus) contactStatus.textContent = 'Opening WhatsApp to send your message...';
+    setTimeout(() => {
+      window.open(`https://wa.me/917696884103?text=${msg}`, '_blank');
+      contactForm.reset();
+      if (contactStatus) contactStatus.textContent = 'Message ready! We\'ll reply shortly.';
     }, 500);
   });
 
