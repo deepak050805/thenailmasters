@@ -8,7 +8,7 @@
 .has-dropdown{position:relative;}
 .dropdown-trigger{display:flex;align-items:center;gap:6px;cursor:pointer;}
 .dropdown-trigger svg{transition:transform .3s var(--ease);}
-.has-dropdown:hover .dropdown-trigger svg{transform:rotate(180deg);}
+.has-dropdown.open .dropdown-trigger svg{transform:rotate(180deg);}
 .nav-dropdown{
   position:absolute;top:calc(100% + 22px);left:50%;transform:translateX(-50%) translateY(8px);
   background:var(--ivory);border:1px solid var(--line);border-radius:6px;
@@ -18,7 +18,7 @@
   transition:opacity .3s var(--ease),visibility .3s var(--ease),transform .3s var(--ease);
   z-index:1200;
 }
-.has-dropdown:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.has-dropdown.open .nav-dropdown{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
 .nav-dropdown a{
   display:flex;align-items:center;gap:12px;
   padding:12px 14px;border-radius:4px;

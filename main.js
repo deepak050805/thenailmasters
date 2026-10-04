@@ -1,277 +1,309 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-
-  /* ---------------- Preloader ---------------- */
-  const preMark = document.getElementById('preMark');
-  const brandLetters = 'The Nail Masters'.split('');
-  if (preMark) {
-    brandLetters.forEach((ch, i) => {
-      const span = document.createElement('span');
-      span.textContent = ch === ' ' ? '\u00A0' : ch;
-      span.style.animationDelay = `${i * 0.035}s`;
-      preMark.appendChild(span);
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const mobile = matchMedia('(max-width: 1080px)');
+  const element = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  };
+  const iconButton = (label, symbol) => {
+    const button = element('button', 'round-control', symbol);
+    button.type = 'button';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    return button;
+  };
+  const lockScroll = () => document.body.classList.toggle('modal-open', !!document.querySelector('dialog[open]'));
+  const createDialog = (label, className) => {
+    const dialog = element('dialog', className);
+    dialog.setAttribute('aria-label', label);
+    const close = iconButton('Close', '\u00d7');
+    close.classList.add('dialog-close');
+    dialog.append(close);
+    document.body.append(dialog);
+    close.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', lockScroll);
+    dialog.addEventListener('keydown', event => {
+      if (event.key !== 'Tab') return;
+      const focusable = [...dialog.querySelectorAll('a[href], button, input, select, textarea, [tabindex="0"]')]
+        .filter(node => !node.disabled && !node.closest('[inert]') && node.getClientRects().length);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
+      }
     });
-  }
-
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      document.getElementById('preloader')?.classList.add('hide');
-      document.body.style.overflow = '';
-    }, 1400);
-  });
-
-  /* ---------------- Custom cursor ---------------- */
-  const dot = document.querySelector('.cursor-dot');
-  const ring = document.querySelector('.cursor-ring');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  if (dot && ring) {
-    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
-    (function loopCursor(){
-      rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
-      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-      requestAnimationFrame(loopCursor);
-    })();
-    document.querySelectorAll('a, button, .filter-btn, .masonry-item, input, textarea, select').forEach(el => {
-      el.addEventListener('mouseenter', () => ring.classList.add('grow'));
-      el.addEventListener('mouseleave', () => ring.classList.remove('grow'));
+    dialog.addEventListener('click', event => {
+      const rect = dialog.getBoundingClientRect();
+      if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right ||
+          event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
     });
-  }
-
-  /* ---------------- Lenis smooth scroll ---------------- */
-  let lenis;
-  if (window.Lenis) {
-    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
-    function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
-    requestAnimationFrame(raf);
-    if (window.gsap && window.ScrollTrigger) {
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add((time) => lenis.raf(time * 1000));
-      gsap.ticker.lagSmoothing(0);
-    }
-  }
-
-  /* ---------------- AOS ---------------- */
-  if (window.AOS) AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 60 });
-
-  /* ---------------- Header scroll state ---------------- */
+    return dialog;
+  };
+  const showDialog = dialog => { dialog.showModal(); lockScroll(); };
   const header = document.getElementById('siteHeader');
-  window.addEventListener('scroll', () => {
-    header?.classList.toggle('scrolled', window.scrollY > 40);
-  });
+  const updateHeader = () => header?.classList.toggle('scrolled', window.scrollY > 30);
+  updateHeader();
+  window.addEventListener('scroll', updateHeader, { passive: true });
 
-  /* ---------------- Mobile nav ---------------- */
   const burger = document.getElementById('burger');
-  const navLinks = document.getElementById('navLinks');
-  if (burger && navLinks) {
+  const nav = document.getElementById('navLinks');
+  if (burger && nav) {
+    const originalParent = nav.parentElement;
+    const originalNext = nav.nextSibling;
+    const dialog = createDialog('Main navigation', 'nav-dialog');
+    dialog.id = 'mobileNavigation';
+    burger.setAttribute('aria-controls', dialog.id);
+    burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-label', 'Open menu');
+    nav.setAttribute('aria-label', 'Main navigation');
+    const sync = () => {
+      if (dialog.open) dialog.close();
+      if (mobile.matches) dialog.append(nav);
+      else originalParent.insertBefore(nav, originalNext);
+    };
+    sync();
+    mobile.addEventListener('change', sync);
     burger.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      burger.classList.toggle('active');
+      nav.classList.add('open');
+      burger.classList.add('active');
+      burger.setAttribute('aria-expanded', 'true');
+      showDialog(dialog);
     });
-    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+    dialog.addEventListener('close', () => {
+      nav.classList.remove('open');
+      burger.classList.remove('active');
+      burger.setAttribute('aria-expanded', 'false');
+      burger.focus({ preventScroll: true });
+    });
+    nav.addEventListener('click', event => {
+      if (event.target.closest('a') && dialog.open) dialog.close();
+    });
+    nav.querySelectorAll('a').forEach(link => {
+      const target = new URL(link.href);
+      if (target.pathname === location.pathname && !target.hash) link.setAttribute('aria-current', 'page');
+    });
   }
 
-  /* ---------------- Brush-stroke draw on view (signature element) ---------------- */
-  const brushes = document.querySelectorAll('.brush');
-  if ('IntersectionObserver' in window) {
-    const brushObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
-    }, { threshold: 0.4 });
-    brushes.forEach(b => brushObserver.observe(b));
-  } else {
-    brushes.forEach(b => b.classList.add('in-view'));
-  }
-
-  /* ---------------- Button ripple ---------------- */
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('click', function(e){
-      const r = document.createElement('span');
-      r.className = 'ripple';
-      const rect = this.getBoundingClientRect();
-      r.style.left = (e.clientX - rect.left) + 'px';
-      r.style.top = (e.clientY - rect.top) + 'px';
-      this.appendChild(r);
-      setTimeout(() => r.remove(), 650);
-    });
+  document.querySelectorAll('.brush').forEach(brush => brush.classList.add('in-view'));
+  document.querySelectorAll('.faq-item').forEach((item, index) => {
+    const old = item.querySelector('.faq-q');
+    const answer = item.querySelector('.faq-a');
+    if (!old || !answer) return;
+    const question = element('button', 'faq-q');
+    question.type = 'button';
+    while (old.firstChild) question.append(old.firstChild);
+    old.replaceWith(question);
+    answer.id = 'faq-answer-' + index;
+    question.setAttribute('aria-controls', answer.id);
+    const update = () => {
+      const open = item.classList.contains('open');
+      question.setAttribute('aria-expanded', String(open));
+      answer.hidden = !open;
+    };
+    update();
+    question.addEventListener('click', () => { item.classList.toggle('open'); update(); });
   });
 
-  /* ---------------- GSAP section reveals ---------------- */
-  if (window.gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-    gsap.utils.toArray('.service-card, .price-card, .offer-card').forEach((el, i) => {
-      gsap.fromTo(el, { y: 40, opacity: 0 }, {
-        y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 90%' },
-        delay: (i % 3) * 0.08
-      });
+  // Preserve the existing Instagram destinations alongside photo viewing.
+  const gallery = document.querySelector('.insta-strip');
+  if (gallery) {
+    const photos = [];
+    gallery.querySelectorAll('a').forEach((link, index) => {
+      const image = link.querySelector('img');
+      if (!image) return;
+      const frame = element('figure', 'gallery-photo');
+      const button = element('button', 'gallery-open');
+      button.type = 'button';
+      button.setAttribute('aria-label', 'Enlarge photo ' + (index + 1) + ': ' + image.alt);
+      link.before(frame);
+      button.append(image);
+      link.textContent = 'Instagram \u2197';
+      link.className = 'gallery-source';
+      frame.append(button, link);
+      photos.push({ button, image });
     });
-  }
-
-  /* ---------------- Gallery: data-driven masonry ---------------- */
-  const galleryData = [
-    { cat: 'nail-art', tag: 'Nail Art', img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=500', h: 620 },
-    { cat: 'gel', tag: 'Gel Nails', img: 'https://i.pinimg.com/1200x/a7/a3/53/a7a3534a11881a252b1b97ef2abcf0ff.jpg', h: 420 },
-    { cat: 'french', tag: 'French Tips', img: 'https://i.pinimg.com/736x/1d/56/05/1d5605b105b5dc0b9fcc4f16a9e265c5.jpg', h: 520 },
-    { cat: 'bridal', tag: 'Bridal Nails', img: 'https://i.pinimg.com/736x/0e/85/98/0e8598e01ec277bdee6ec303720dce9f.jpg', h: 700 },
-    { cat: 'chrome', tag: 'Chrome Nails', img: 'https://i.pinimg.com/1200x/99/56/8b/99568bce9c9191261c156b3a08f767d8.jpg', h: 460 },
-    { cat: 'cateye', tag: 'Cat Eye', img: 'https://i.pinimg.com/736x/7a/f9/ea/7af9ea13ed2fcd84441e44e1d2a7c46f.jpg', h: 560 },
-    { cat: 'pastel', tag: 'Pastel', img: 'https://i.pinimg.com/736x/a3/21/83/a32183e4ea2b8d2e1e7905bfe10107f5.jpg', h: 480 },
-    { cat: 'facial', tag: 'Hydra Facial', img: 'https://i.pinimg.com/736x/20/68/c7/2068c767f1466a806e9222b81a614e78.jpg', h: 640 },
-    { cat: 'salon', tag: 'Salon', img: 'https://i.pinimg.com/1200x/12/05/da/1205da2d133c987819991bcd32c81281.jpg', h: 500 },
-    { cat: 'nail-art', tag: 'Nail Art', img: 'https://i.pinimg.com/1200x/9c/f8/f5/9cf8f5167623d56ecb8ec3baa3032679.jpg', h: 540 },
-    { cat: 'gel', tag: 'Gel Nails', img: 'https://i.pinimg.com/736x/3d/5b/b4/3d5bb44f057f493d05b4beb0a665aa6f.jpg', h: 600 },
-    { cat: 'bridal', tag: 'Bridal Nails', img: 'https://i.pinimg.com/736x/12/8f/cb/128fcbc81e4f20d4b17080f1061360d8.jpg', h: 460 },
-  ];
-
-  const masonry = document.getElementById('masonry');
-  if (masonry) {
-    galleryData.forEach((item, i) => {
-      const div = document.createElement('div');
-      div.className = 'masonry-item';
-      div.dataset.cat = item.cat;
-      div.dataset.index = i;
-      div.innerHTML = `<img src="${item.img}" alt="${item.tag} — The Nail Masters, Mohali" loading="lazy"><span class="tag">${item.tag}</span>`;
-      masonry.appendChild(div);
-    });
-  }
-
-  /* Filtering */
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      document.querySelectorAll('.masonry-item').forEach(item => {
-        item.classList.toggle('hidden', f !== 'all' && item.dataset.cat !== f);
-      });
-    });
-  });
-
-  /* Lightbox */
-  const lightbox = document.getElementById('lightbox');
-  let currentIndex = 0;
-  function visibleItems(){ return Array.from(document.querySelectorAll('.masonry-item:not(.hidden)')); }
-  function openLightbox(index){
-    const items = visibleItems();
-    currentIndex = items.findIndex(el => Number(el.dataset.index) === index);
-    if (currentIndex === -1) currentIndex = 0;
-    updateLightbox(items);
-    lightbox.classList.add('open');
-  }
-  function updateLightbox(items){
-    const item = items[currentIndex];
-    const lbImg = lightbox.querySelector('img');
-    lbImg.src = item.querySelector('img').src.replace('w=500','w=1400');
-    lbImg.alt = item.querySelector('img').alt;
-  }
-  if (lightbox) {
-    document.querySelectorAll('.masonry-item').forEach(item => {
-      item.addEventListener('click', () => openLightbox(Number(item.dataset.index)));
-    });
-    lightbox.querySelector('.lb-close')?.addEventListener('click', () => lightbox.classList.remove('open'));
-    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('open'); });
-    lightbox.querySelector('.lb-prev')?.addEventListener('click', () => {
-      const items = visibleItems(); currentIndex = (currentIndex - 1 + items.length) % items.length; updateLightbox(items);
-    });
-    lightbox.querySelector('.lb-next')?.addEventListener('click', () => {
-      const items = visibleItems(); currentIndex = (currentIndex + 1) % items.length; updateLightbox(items);
-    });
-    document.addEventListener('keydown', (e) => {
-      if (!lightbox.classList.contains('open')) return;
-      if (e.key === 'Escape') lightbox.classList.remove('open');
-      if (e.key === 'ArrowRight') lightbox.querySelector('.lb-next')?.click();
-      if (e.key === 'ArrowLeft') lightbox.querySelector('.lb-prev')?.click();
-    });
-  }
-
-  /* ---------------- Swiper testimonials ---------------- */
-  if (window.Swiper) {
-    new Swiper('.testiSwiper', {
-      slidesPerView: 1,
-      spaceBetween: 24,
-      loop: true,
-      speed: 6000,
-      allowTouchMove: true,
-      freeMode: {
-        enabled: true,
-        momentum: false
-      },
-      autoplay: {
-        delay: 1,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: false
-      },
-      breakpoints: {
-        720: { slidesPerView: 2 },
-        1080: { slidesPerView: 3 }
+    const dialog = createDialog('Photo gallery', 'gallery-dialog');
+    const image = element('img', 'lightbox-image');
+    const caption = element('p', 'gallery-caption');
+    caption.setAttribute('aria-live', 'polite');
+    const controls = element('div', 'gallery-controls');
+    const prev = iconButton('Previous photo', '\u2190');
+    const next = iconButton('Next photo', '\u2192');
+    controls.append(prev, caption, next);
+    dialog.append(image, controls);
+    let current = 0;
+    const update = step => {
+      current = (current + step + photos.length) % photos.length;
+      image.src = photos[current].image.src;
+      image.alt = photos[current].image.alt;
+      caption.textContent = (current + 1) + ' / ' + photos.length;
+    };
+    photos.forEach((photo, index) => photo.button.addEventListener('click', () => {
+      current = index;
+      update(0);
+      showDialog(dialog);
+    }));
+    prev.addEventListener('click', () => update(-1));
+    next.addEventListener('click', () => update(1));
+    dialog.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        update(event.key === 'ArrowLeft' ? -1 : 1);
       }
     });
+    let touchX;
+    image.addEventListener('touchstart', event => { touchX = event.changedTouches[0].clientX; }, { passive: true });
+    image.addEventListener('touchend', event => {
+      const distance = event.changedTouches[0].clientX - touchX;
+      if (Math.abs(distance) > 45) update(distance < 0 ? 1 : -1);
+    }, { passive: true });
   }
 
-  /* ---------------- FAQ accordion ---------------- */
-  document.querySelectorAll('.faq-item').forEach(item => {
-    const q = item.querySelector('.faq-q');
-    const a = item.querySelector('.faq-a');
-    if (item.classList.contains('open')) a.style.maxHeight = a.scrollHeight + 'px';
-    q.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => { i.classList.remove('open'); i.querySelector('.faq-a').style.maxHeight = null; });
-      if (!isOpen) { item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; }
+  document.querySelectorAll('.testiSwiper').forEach(container => {
+    container.setAttribute('aria-label', 'Google customer reviews');
+    container.setAttribute('role', 'region');
+    const slides = Array.from(container.querySelectorAll('.swiper-slide'));
+    const dialog = createDialog('Customer review', 'review-dialog');
+    const detail = element('div', 'review-detail');
+    dialog.append(detail);
+    slides.forEach(slide => {
+      const card = slide.querySelector('.testi-card');
+      const stars = card.querySelector('.testi-stars');
+      stars.setAttribute('aria-label', '5 out of 5 stars');
+      const avatar = card.querySelector('img');
+      avatar.loading = 'lazy';
+      avatar.decoding = 'async';
+      avatar.alt = '';
+      avatar.width = 48;
+      avatar.height = 48;
+      avatar.addEventListener('error', () => {
+        const initials = card.querySelector('.testi-who b').textContent.split(' ').slice(0, 2).map(word => word[0]).join('');
+        const replacement = element('span', 'review-initials', initials);
+        replacement.setAttribute('aria-hidden', 'true');
+        avatar.replaceWith(replacement);
+      }, { once: true });
+      const button = element('button', 'review-read', 'Read full review');
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        detail.replaceChildren();
+        detail.append(element('div', 'testi-stars', stars.textContent),
+          element('h2', '', card.querySelector('.testi-who b').textContent),
+          element('blockquote', '', card.querySelector('p').textContent),
+          element('p', 'review-source', card.querySelector('.testi-who div span').textContent));
+        showDialog(dialog);
+      });
+      card.querySelector('p').after(button);
     });
-  });
-
-  /* ---------------- Booking form ---------------- */
-  const form = document.getElementById('bookingForm');
-  const status = document.getElementById('formStatus');
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    const name = data.get('name'), phone = data.get('phone'), service = data.get('service'),
-          date = data.get('date'), time = data.get('time'), notes = data.get('notes');
-
-    // This is a static site: we hand off to WhatsApp with a pre-filled message.
-    // (The full-stack version stores this in MongoDB + emails the admin instead.)
-    const msg = `Hi! I'd like to book an appointment.%0A` +
-      `Name: ${name}%0APhone: ${phone}%0AService: ${service}%0ADate: ${date}%0ATime: ${time}` +
-      (notes ? `%0ANotes: ${notes}` : '');
-    if (status) status.textContent = 'Opening WhatsApp to confirm your request...';
-    setTimeout(() => {
-      window.open(`https://wa.me/917696884103?text=${msg}`, '_blank');
-      form.reset();
-      if (status) status.textContent = 'Request sent! We\'ll confirm your slot shortly.';
-    }, 500);
-  });
-
-  /* ---------------- Contact form ---------------- */
-  const contactForm = document.getElementById('contactForm');
-  const contactStatus = document.getElementById('contactFormStatus');
-  contactForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(contactForm);
-    const name = data.get('name'), phone = data.get('phone'), email = data.get('email'), message = data.get('message');
-
-    const msg = `Hi! I have a question.%0A` +
-      `Name: ${name}%0APhone: ${phone}` +
-      (email ? `%0AEmail: ${email}` : '') +
-      `%0AMessage: ${message}`;
-    if (contactStatus) contactStatus.textContent = 'Opening WhatsApp to send your message...';
-    setTimeout(() => {
-      window.open(`https://wa.me/917696884103?text=${msg}`, '_blank');
-      contactForm.reset();
-      if (contactStatus) contactStatus.textContent = 'Message ready! We\'ll reply shortly.';
-    }, 500);
-  });
-
-  /* ---------------- Smooth in-page anchor scrolling with Lenis ---------------- */
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      const id = a.getAttribute('href');
-      if (id.length > 1 && document.querySelector(id)) {
-        e.preventDefault();
-        const target = document.querySelector(id);
-        if (lenis) lenis.scrollTo(target, { offset: -80 });
-        else target.scrollIntoView({ behavior: 'smooth' });
+    if (!window.Swiper) return;
+    const controls = element('div', 'review-controls');
+    const prev = iconButton('Previous review', '\u2190');
+    const next = iconButton('Next review', '\u2192');
+    const progress = element('span', 'review-progress');
+    progress.setAttribute('aria-live', 'polite');
+    controls.append(prev, progress, next);
+    container.after(controls);
+    const swiper = new Swiper(container, {
+      slidesPerView: 1, spaceBetween: 20, speed: reducedMotion.matches ? 0 : 450,
+      centeredSlides: true, grabCursor: true, watchSlidesProgress: true,
+      keyboard: { enabled: false },
+      a11y: { enabled: true, slideLabelMessage: 'Review {{index}} of {{slidesLength}}', nextSlideMessage: 'Next review', prevSlideMessage: 'Previous review' },
+      navigation: { prevEl: prev, nextEl: next },
+      breakpoints: { 720: { slidesPerView: 1.65 }, 1080: { slidesPerView: 2.3, spaceBetween: 28 } },
+      on: {
+        init() { progress.textContent = '1 / ' + slides.length; },
+        slideChange() { progress.textContent = (this.activeIndex + 1) + ' / ' + slides.length; },
+        progress() { this.slides.forEach(slide => { slide.inert = !slide.classList.contains('swiper-slide-visible'); }); }
       }
     });
+    container.tabIndex = 0;
+    container.addEventListener('keydown', event => {
+      if (event.target !== container) return;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        if (event.key === 'ArrowRight') swiper.slideNext();
+        else swiper.slidePrev();
+      }
+    });
+    reducedMotion.addEventListener('change', event => { swiper.params.speed = event.matches ? 0 : 450; });
   });
 
+  // This static site hands data to WhatsApp; customers still confirm and send there.
+  const whatsapp = (status, lines) => {
+    const url = new URL('https://wa.me/917696884103');
+    url.searchParams.set('text', lines.join('\n'));
+    window.open(url.href, '_blank', 'noopener,noreferrer');
+    status.replaceChildren(document.createTextNode('Continue in WhatsApp to send your request. '));
+    const link = element('a', 'link-arrow', 'Open WhatsApp');
+    link.href = url.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    status.append(link);
+  };
+  ['bookingForm', 'contactForm'].forEach(id => {
+    const form = document.getElementById(id);
+    if (!form) return;
+    const status = document.getElementById(id === 'bookingForm' ? 'formStatus' : 'contactFormStatus');
+    status.setAttribute('role', 'status');
+    form.querySelectorAll('input, textarea').forEach(input => {
+      if (input.name === 'name') { input.maxLength = 80; input.autocomplete = 'name'; input.minLength = 2; }
+      if (input.type === 'tel') { input.maxLength = 24; input.pattern = '[+0-9\\s\\(\\)\\-]{7,24}'; input.autocomplete = 'tel'; }
+      if (input.type === 'email') { input.maxLength = 254; input.autocomplete = 'email'; }
+      if (input.tagName === 'TEXTAREA') input.maxLength = 2000;
+      if (input.getAttribute('type') === 'date') {
+        const today = new Date();
+        input.min = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        if (input.type !== 'date') {
+          input.placeholder = 'YYYY-MM-DD';
+          input.pattern = '[0-9]{4}-[0-9]{2}-[0-9]{2}';
+          input.inputMode = 'numeric';
+        }
+      }
+      if (input.getAttribute('type') === 'time' && input.type !== 'time') {
+        input.placeholder = 'HH:MM';
+        input.pattern = '([01][0-9]|2[0-3]):[0-5][0-9]';
+        input.inputMode = 'numeric';
+      }
+      input.addEventListener('input', () => input.setCustomValidity(''));
+    });
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const name = form.elements.name;
+      name.setCustomValidity(name.value.trim().length < 2 ? 'Please enter your name.' : '');
+      const phone = form.elements.phone;
+      phone.setCustomValidity(phone.value.replace(/\D/g, '').length < 7 ? 'Please enter a valid phone number.' : '');
+      const message = form.elements.message;
+      if (message) message.setCustomValidity(message.value.trim() ? '' : 'Please enter your message.');
+      const date = form.elements.date;
+      if (date) {
+        const parts = date.value.split('-').map(Number);
+        const parsed = new Date(parts[0], parts[1] - 1, parts[2]);
+        const valid = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date.value) && date.value >= date.min &&
+          parsed.getFullYear() === parts[0] && parsed.getMonth() === parts[1] - 1 && parsed.getDate() === parts[2];
+        date.setCustomValidity(valid ? '' : 'Please choose a valid date from today onwards.');
+      }
+      if (!form.reportValidity()) return;
+      const data = new FormData(form);
+      const lines = [id === 'bookingForm' ? "Hi! I'd like to book an appointment." : 'Hi! I have a question.'];
+      data.forEach((value, key) => { if (String(value).trim()) lines.push(key[0].toUpperCase() + key.slice(1) + ': ' + String(value).trim()); });
+      whatsapp(status, lines);
+    });
+  });
+  document.querySelectorAll('.footer-news form').forEach(form => {
+    form.removeAttribute('onsubmit');
+    const email = form.querySelector('input');
+    email.setAttribute('aria-label', 'Email for studio updates');
+    email.autocomplete = 'email';
+    email.maxLength = 254;
+    const status = element('p', 'form-status');
+    status.setAttribute('role', 'status');
+    form.after(status);
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      if (form.reportValidity()) whatsapp(status, ['Hi! Please share studio updates with me.', 'Email: ' + email.value.trim()]);
+    });
+  });
 });
