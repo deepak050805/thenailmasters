@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = process.cwd();
 const target = path.resolve(root, 'dist');
-const files = ['index.html', 'services.html', 'booking.html', 'contact.html', 'style.css', 'services.css', 'premium.css', 'main.js', 'services.js', 'motion.js', 'hero-3d.js', '_headers', ...fs.readdirSync('services').filter(f => f.endsWith('.html')).map(f => 'services/' + f)];
+const files = ['index.html', 'services.html', 'booking.html', 'contact.html', 'style.css', 'services.css', 'premium.css', 'main.js', 'services.js', 'motion.js', 'hero-3d.js', 'nail-canvas.css', 'nail-design.js', 'nail-canvas.js', 'nail-booking.js', 'serene-luxe.css', 'serene-luxe.js', '_headers', ...fs.readdirSync('services').filter(f => f.endsWith('.html')).map(f => 'services/' + f)];
 // Copy only assets referenced by pages, stylesheets, and the optional runtime interface.
 const assets = new Set();
 for (const file of files.filter(f => f.endsWith('.html'))) {

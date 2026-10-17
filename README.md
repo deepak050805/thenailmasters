@@ -249,3 +249,65 @@ https://www.instagram.com/thenailmasters.in/
 ## Goal
 
 The goal of this project is to provide a premium, mobile-friendly digital presence for The Nail Masters while making it easy for customers to discover services, trust the studio, and quickly book or contact through familiar channels like WhatsApp, phone, Instagram, and Google Maps.
+
+
+## Nail Canvas and mood finder
+
+The homepage includes a LUMÉ-inspired mood finder, six original illustrated starting looks,
+and a five-finger Nail Canvas at `index.html#nail-canvas`. No new packages or runtime services.
+
+- Choose each nail's shape, length, palette colour and finish; preview three skin tones.
+- Add up to three details per nail. Drag to position, or use keyboard-accessible sliders.
+- Undo/redo, copy a nail to the set, and local autosave. Storage failure keeps editing usable.
+- Export a 1200 × 1500 PNG. This is an illustration, not a property photo or guaranteed result.
+- Enquire with the design to populate the existing booking notes. The validated design travels
+  in a URL fragment; the booking form still opens WhatsApp for the visitor to send.
+- PNGs are downloaded locally and can be attached by the visitor in WhatsApp. They are not uploaded automatically.
+- Artwork, suitability, prices and availability are confirmed by the studio.
+
+Open `index.html` directly, or run `python -m http.server 8080 --bind 127.0.0.1` from this folder,
+then visit `http://127.0.0.1:8080/`. Build and audit with `node tools/build-static.cjs`,
+`node tools/check-static.cjs` and `node tools/check-nail-canvas.cjs`.
+
+`nail-design.js` owns the validated shared model and SVG renderer; `nail-canvas.js` owns homepage
+interactions; `nail-booking.js` handles booking prefill; `nail-canvas.css` is scoped to the new experience.
+
+
+## Serene Luxe visual direction
+
+The visual adaptation references Lumex Agency's **Nails Salon Website | Serene Luxe**:
+https://www.behance.net/gallery/226745981/Nails-Salon-Website-Serene-Luxe
+The designer's public Serene Luxe presentation on Dribbble was used to inspect its photographic
+composition and burgundy/white palette when Behance blocked direct access:
+https://dribbble.com/shots/25793065-Serene-Luxe-Spa
+
+The Nail Masters retains its own identity, content, contact details and interactive Canvas.
+`serene-luxe.css` provides the shared wine/cream theme and responsive editorial composition;
+`serene-luxe.js` adds reversible, scroll-linked hero image movement with reduced-motion support.
+Existing local images are reused as illustrative references; no reference-site photography or
+branding is shipped. Gallery lightboxes, mood matching and the design-to-booking flow remain intact.
+The optional build still uses `node tools/build-static.cjs`; no packages are needed to serve the site.
+
+
+The opening hero uses the user-supplied CloudFront MP4 as a muted, inline, looping background.
+`assets/images/hero-video-poster.jpg` is a lightweight still extracted from the same clip.
+Reduced-motion visitors see the still without loading the video; blocked playback/errors also
+fall back to it. Playback pauses when the hero is offscreen or the tab is hidden. A pause/play
+control becomes visible on keyboard focus. The media CSP permits only the supplied CDN and self.
+
+
+Responsive behaviour is shared across all pages in `serene-luxe.css`: fluid gutters and headings,
+safe-area-aware fullscreen film, landscape layout, compact desktop navigation, one-column tablet
+Canvas, stacked mobile forms and a responsive footer. All pages allow normal browser zoom.
+Video backgrounds use `object-fit: cover`, so their edges can crop to fill different aspect ratios.
+For visual QA, check 320/360/390/430px phones, 768/820/960px tablets, 1080/1280/1440/1920px desktops,
+landscape phones and 200% browser zoom. Interaction/model checks do not replace device visual QA.
+
+
+The **Colour, in motion** section between the gallery and mood board embeds the user-supplied
+Pinterest nail-care animation with creator credit (BETER) and a direct source link:
+https://www.pinterest.com/pin/3025924745623576/ . The supplied short link redirects through a
+saved pin whose public metadata identifies this canonical pin. The official Pinterest iframe
+loads lazily, keeps playback controls/source attribution, and needs no third-party script on
+our page. The frame CSP permits `https://assets.pinterest.com` alongside the existing map host.
+Pinterest availability can affect the player; the source link remains available below it.

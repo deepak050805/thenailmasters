@@ -241,3 +241,6 @@ dialog[open] { animation: dialog-in .22s var(--ease); }
   .brush path { stroke-dashoffset: 0; }
   .btn:hover, .menu-card:hover, .round-control:hover { transform: none; }
 }
+
+/* Leave room for the Nail Canvas link on compact desktop headers. */
+@media (min-width:1081px) and (max-width:1220px) { .nav-links { gap:14px; } .nav-inner { gap:16px; } }
